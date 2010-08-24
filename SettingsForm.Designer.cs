@@ -34,6 +34,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.numTab = new System.Windows.Forms.NumericUpDown();
             this.btnOK = new System.Windows.Forms.Button();
+            this.btnFreeRegistr = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label1
@@ -62,19 +63,30 @@
             // 
             // btnOK
             // 
-            this.btnOK.Location = new System.Drawing.Point(248, 239);
+            this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnOK.Location = new System.Drawing.Point(196, 193);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(38, 20);
             this.btnOK.TabIndex = 2;
             this.btnOK.Text = "OK";
             this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
             // 
+            // btnFreeRegistr
+            // 
+            this.btnFreeRegistr.Location = new System.Drawing.Point(3, 64);
+            this.btnFreeRegistr.Name = "btnFreeRegistr";
+            this.btnFreeRegistr.Size = new System.Drawing.Size(220, 20);
+            this.btnFreeRegistr.TabIndex = 4;
+            this.btnFreeRegistr.Text = "Очистка реестра";
+            this.btnFreeRegistr.Click += new System.EventHandler(this.btnFreeRegistr_Click);
+            // 
             // SettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.AutoScroll = true;
-            this.ClientSize = new System.Drawing.Size(289, 262);
+            this.ClientSize = new System.Drawing.Size(242, 219);
+            this.Controls.Add(this.btnFreeRegistr);
             this.Controls.Add(this.btnOK);
             this.Controls.Add(this.numTab);
             this.Controls.Add(this.label1);
@@ -93,6 +105,7 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.NumericUpDown numTab;
         private System.Windows.Forms.Button btnOK;
+        private System.Windows.Forms.Button btnFreeRegistr;
 
     }
 }

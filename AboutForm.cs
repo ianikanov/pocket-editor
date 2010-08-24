@@ -6,6 +6,7 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using System.Reflection;
 
 namespace JSEditor
 {
@@ -14,6 +15,7 @@ namespace JSEditor
         public AboutForm()
         {
             InitializeComponent();
+            lblVersion.Text = Assembly.GetExecutingAssembly().GetName().Version.ToString();
         }
     }
 }
