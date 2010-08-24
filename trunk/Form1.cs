@@ -22,7 +22,8 @@ namespace JSEditor
         private void addTab(string name)
         { 
             cRichTextBox txt = new cRichTextBox();
-            txt.Language = GetCurrentControl().Language;
+            if (tabControl1.TabPages.Count > 0) txt.Language = GetCurrentControl().Language;
+            else txt.Language = 1;
             txt.Dock = DockStyle.Fill;
             TabPage tab = new TabPage();
             //tab.Name = name;
@@ -62,16 +63,19 @@ namespace JSEditor
 
         private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            int lng = GetCurrentControl().Language;
-            foreach (MenuItem mi in menuLanguage.MenuItems) mi.Checked = false;
-            switch (lng)
+            if (tabControl1.TabPages.Count > 0)
             {
-                case 1: miPhp.Checked = true; break;
-                case 2: miFlash.Checked = true; break;
-                case 3: miHtml.Checked = true; break;
-                case 4: miPhp.Checked = true; break;
-                case 5: miPhp.Checked = true; break;
-                case 6: miPhp.Checked = true; break;
+                int lng = GetCurrentControl().Language;
+                foreach (MenuItem mi in menuLanguage.MenuItems) mi.Checked = false;
+                switch (lng)
+                {
+                    case 1: miPhp.Checked = true; break;
+                    case 2: miFlash.Checked = true; break;
+                    case 3: miHtml.Checked = true; break;
+                    case 4: miPhp.Checked = true; break;
+                    case 5: miPhp.Checked = true; break;
+                    case 6: miPhp.Checked = true; break;
+                }
             }
         }
 
@@ -104,21 +108,25 @@ namespace JSEditor
         private void btnComment_Click(object sender, EventArgs e)
         {
             GetCurrentControl().Comment();
+            GetCurrentControl().FocusText();
         }
 
         private void btnUncomment_Click(object sender, EventArgs e)
         {
             GetCurrentControl().Uncomment();
+            GetCurrentControl().FocusText();
         }
 
         private void btnSave_Click(object sender, EventArgs e)
         {
             miSave_Click(null, null);
+            GetCurrentControl().FocusText();
         }
 
         private void btnSaveAll_Click(object sender, EventArgs e)
         {
             miSaveAll_Click(null, null);
+            GetCurrentControl().FocusText();
         }
 
         private void btnVerify_Click(object sender, EventArgs e)
@@ -154,14 +162,14 @@ namespace JSEditor
                 foreach (MenuItem mi in menuLanguage.MenuItems) mi.Checked = false;
                 switch (f.Extension)
                 {
-                    case "php": miPhp.Checked = true; GetCurrentControl().Language = 1; break;
-                    case "as": miFlash.Checked = true; GetCurrentControl().Language = 2; break;
-                    case "html": miHtml.Checked = true; GetCurrentControl().Language = 3; break;
-                    case "htm": miHtml.Checked = true; GetCurrentControl().Language = 3; break;
-                    case "js": miHtml.Checked = true; GetCurrentControl().Language = 3; break;
-                    case "cs": miPhp.Checked = true; GetCurrentControl().Language = 4; break;
-                    case "cpp": miPhp.Checked = true; GetCurrentControl().Language = 5; break;
-                    case "sql": miPhp.Checked = true; GetCurrentControl().Language = 6; break;
+                    case ".php": miPhp.Checked = true; GetCurrentControl().Language = 1; break;
+                    case ".as": miFlash.Checked = true; GetCurrentControl().Language = 2; break;
+                    case ".html": miHtml.Checked = true; GetCurrentControl().Language = 3; break;
+                    case ".htm": miHtml.Checked = true; GetCurrentControl().Language = 3; break;
+                    case ".js": miHtml.Checked = true; GetCurrentControl().Language = 3; break;
+                    case ".cs": miPhp.Checked = true; GetCurrentControl().Language = 4; break;
+                    case ".cpp": miPhp.Checked = true; GetCurrentControl().Language = 5; break;
+                    case ".sql": miPhp.Checked = true; GetCurrentControl().Language = 6; break;
                 }
                 StreamReader sr = null;
                 try
@@ -311,11 +319,13 @@ namespace JSEditor
         private void miTabRight_Click(object sender, EventArgs e)
         {
             GetCurrentControl().TabRight();
+            GetCurrentControl().FocusText();
         }
 
         private void miTabLeft_Click(object sender, EventArgs e)
         {
             GetCurrentControl().TabLeft();
+            GetCurrentControl().FocusText();
         }
         #endregion
 

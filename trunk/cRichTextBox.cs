@@ -125,6 +125,7 @@ namespace JSEditor
             int curPosition = txtMain.SelectionStart;
             txtMain.Text = str.Substring(0, str.Length - 1);
             txtMain.SelectionStart = curPosition + newSpace.Length;
+            txtMain.ScrollToCaret();
         }
 
         /// <summary>
@@ -177,6 +178,7 @@ namespace JSEditor
             int curPosition = txtMain.SelectionStart;
             txtMain.Text = str.Substring(0, str.Length - 1);
             txtMain.SelectionStart = curPosition + newSpace.Length;
+            txtMain.ScrollToCaret();
         }
 
         /// <summary>
@@ -187,6 +189,11 @@ namespace JSEditor
         {
             RemoveFromLineStart(newSpace, false);
         }
+
+        internal void FocusText()
+        {
+            txtMain.Focus();
+        }
         #endregion
 
         #region ContextMenu
@@ -196,6 +203,7 @@ namespace JSEditor
             int cursor = txtMain.SelectionStart;
             txtMain.Text = txtMain.Text.Substring(0, cursor) + txtMain.Text.Substring(cursor + txtMain.SelectionLength, txtMain.TextLength - (cursor + txtMain.SelectionLength));
             txtMain.SelectionStart = cursor;
+            txtMain.ScrollToCaret();
         }
 
         private void miCopy_Click(object sender, EventArgs e)

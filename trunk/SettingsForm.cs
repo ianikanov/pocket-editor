@@ -41,5 +41,17 @@ namespace JSEditor
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
             }
         }
+
+        private void btnFreeRegistr_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Registry.CurrentUser.DeleteSubKey("Software\\JSEditor", true);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
+            }
+        }
     }
 }
