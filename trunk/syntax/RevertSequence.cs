@@ -1,4 +1,4 @@
-//using ...
+using System.Collections.Generic;
 
 namespace Syntax
 {
@@ -6,5 +6,10 @@ namespace Syntax
 	{
 		List<IRevertsElement> Operands { get; set; }
 		List<IRevertsElement> Actions { get; set; }
-	}
+
+        public List<IRevertsElement> GetSequence()
+        {
+            throw new System.NotImplementedException();
+        }
+    }
 }
