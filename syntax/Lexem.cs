@@ -1,4 +1,4 @@
-//using ...
+using System.Collections.Generic;
 
 namespace Syntax
 {
@@ -18,6 +18,6 @@ namespace Syntax
 	
 	public enum LexemType
 	{
-		sysword,class,method,var,separator
+        l_sysword, l_class, l_method, l_var, l_separator
 	}
 }

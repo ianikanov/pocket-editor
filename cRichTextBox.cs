@@ -18,17 +18,16 @@ namespace JSEditor
         }
 
         public string FileName { get; set; }
-        public bool IsChanged {
-            get { return txtMain.Modified; }
-            set { txtMain.Modified = value; }
-        }
+        public bool IsChanged { get; set; }
         public override string Text { get { return txtMain.Text; } set { txtMain.Text = value; } }
+        public string SelectedText { get { return txtMain.SelectedText; } }
         public int Language { get; set; }
 
 
         private void txtMain_TextChanged(object sender, EventArgs e)
         {
             int curPosition;
+            IsChanged = true;
             if (txtMain.Text.Length > textlen && txtMain.SelectionStart > 0)//added and not inserted
             {
                 if (txtMain.Text[txtMain.SelectionStart - 1] == '\n')
@@ -111,11 +110,13 @@ namespace JSEditor
             int lfin = GetLineNumber(true);
             string[] ls = GetLines();
             string str = "";
+            int ret = 0;
             for (int i = 0; i < ls.Length; i++)
             {
                 if (i >= lst && i <= lfin)
                 {
                     str += ls[i].Insert((i == 0) ? 0 : 1, newSpace) + "\r";
+                    ret += newSpace.Length;
                 }
                 else
                 {
@@ -123,8 +124,10 @@ namespace JSEditor
                 }
             }
             int curPosition = txtMain.SelectionStart;
+            int len = txtMain.SelectionLength;
             txtMain.Text = str.Substring(0, str.Length - 1);
-            txtMain.SelectionStart = curPosition + newSpace.Length;
+            txtMain.SelectionStart = curPosition;
+            txtMain.SelectionLength = len + ret;
             txtMain.ScrollToCaret();
         }
 
@@ -142,6 +145,7 @@ namespace JSEditor
             string line;
             int cnt;
             string pattern;
+            int ret = 0;
             for (int i = 0; i < ls.Length; i++)
             {
                 if (i >= lst && i <= lfin)
@@ -166,7 +170,11 @@ namespace JSEditor
                         pattern = newSpace.Substring(0, cnt);
                     }
                     //если нашли, то удаляем
-                    if (cnt > 0) str += line.Substring(cnt) + "\r";
+                    if (cnt > 0)
+                    {
+                        str += line.Substring(cnt) + "\r";
+                        ret += cnt;
+                    }
                     else str += line + "\r";
                 }
                 else
@@ -176,8 +184,10 @@ namespace JSEditor
 
             }
             int curPosition = txtMain.SelectionStart;
+            int len = txtMain.SelectionLength;
             txtMain.Text = str.Substring(0, str.Length - 1);
-            txtMain.SelectionStart = curPosition + newSpace.Length;
+            txtMain.SelectionStart = curPosition;
+            txtMain.SelectionLength = len - ret;
             txtMain.ScrollToCaret();
         }
 
@@ -193,6 +203,13 @@ namespace JSEditor
         internal void FocusText()
         {
             txtMain.Focus();
+        }
+
+        internal void SelectText(int pos, int len)
+        {
+            txtMain.SelectionStart = pos;
+            txtMain.SelectionLength = len;
+            txtMain.ScrollToCaret();
         }
         #endregion
 

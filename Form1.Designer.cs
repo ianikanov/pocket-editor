@@ -54,12 +54,13 @@
             this.miSettings = new System.Windows.Forms.MenuItem();
             this.miAbout = new System.Windows.Forms.MenuItem();
             this.menuItem12 = new System.Windows.Forms.MenuItem();
+            this.miSearch = new System.Windows.Forms.MenuItem();
             this.mainMenu1 = new System.Windows.Forms.MainMenu();
+            this.miTabRight = new System.Windows.Forms.MenuItem();
+            this.miTabLeft = new System.Windows.Forms.MenuItem();
             this.pFirst = new System.Windows.Forms.TabPage();
             this.rtbMain = new JSEditor.cRichTextBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.miTabRight = new System.Windows.Forms.MenuItem();
-            this.miTabLeft = new System.Windows.Forms.MenuItem();
             this.panel1.SuspendLayout();
             this.pFirst.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -231,7 +232,13 @@
             // 
             this.menuItem12.MenuItems.Add(this.miSettings);
             this.menuItem12.MenuItems.Add(this.miAbout);
+            this.menuItem12.MenuItems.Add(this.miSearch);
             this.menuItem12.Text = "System";
+            // 
+            // miSearch
+            // 
+            this.miSearch.Text = "Search...";
+            this.miSearch.Click += new System.EventHandler(this.miSearch_Click);
             // 
             // mainMenu1
             // 
@@ -240,6 +247,16 @@
             this.mainMenu1.MenuItems.Add(this.menuItem12);
             this.mainMenu1.MenuItems.Add(this.miTabRight);
             this.mainMenu1.MenuItems.Add(this.miTabLeft);
+            // 
+            // miTabRight
+            // 
+            this.miTabRight.Text = ">>";
+            this.miTabRight.Click += new System.EventHandler(this.miTabRight_Click);
+            // 
+            // miTabLeft
+            // 
+            this.miTabLeft.Text = "<<";
+            this.miTabLeft.Click += new System.EventHandler(this.miTabLeft_Click);
             // 
             // pFirst
             // 
@@ -269,16 +286,6 @@
             this.tabControl1.Size = new System.Drawing.Size(263, 287);
             this.tabControl1.TabIndex = 5;
             this.tabControl1.SelectedIndexChanged += new System.EventHandler(this.tabControl1_SelectedIndexChanged);
-            // 
-            // miTabRight
-            // 
-            this.miTabRight.Text = ">>";
-            this.miTabRight.Click += new System.EventHandler(this.miTabRight_Click);
-            // 
-            // miTabLeft
-            // 
-            this.miTabLeft.Text = "<<";
-            this.miTabLeft.Click += new System.EventHandler(this.miTabLeft_Click);
             // 
             // Form1
             // 
@@ -337,6 +344,7 @@
         private System.Windows.Forms.MenuItem miSql;
         private System.Windows.Forms.MenuItem miTabRight;
         private System.Windows.Forms.MenuItem miTabLeft;
+        private System.Windows.Forms.MenuItem miSearch;
     }
 }
 

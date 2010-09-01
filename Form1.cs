@@ -15,6 +15,7 @@ namespace JSEditor
         {
             InitializeComponent();
             Settings.Load();
+            Settings.Log("loaded");
         }
 
         #region Tabs
@@ -170,6 +171,7 @@ namespace JSEditor
                     case ".cs": miPhp.Checked = true; GetCurrentControl().Language = 4; break;
                     case ".cpp": miPhp.Checked = true; GetCurrentControl().Language = 5; break;
                     case ".sql": miPhp.Checked = true; GetCurrentControl().Language = 6; break;
+                    default: Settings.Log(string.Format("While trying to open file {0} its extension {1} was not recognised", f.FullName, f.Extension)); break;
                 }
                 StreamReader sr = null;
                 try
@@ -241,7 +243,7 @@ namespace JSEditor
         private void SaveFile(string fname)
         {
             FileInfo f = new FileInfo(fname);
-            GetCurrentControl().FileName = f.Name;
+            GetCurrentControl().FileName = f.FullName;
             StreamWriter sw = null;
             try
             {
@@ -259,9 +261,9 @@ namespace JSEditor
         private void AskAndSave()
         {
             SaveFileDialog sfd = new SaveFileDialog();
-            sfd.FilterIndex = miPhp.Checked ? 0 :
+            sfd.FilterIndex = miPhp.Checked ? 1 :
                 miFlash.Checked ? 2 :
-                miHtml.Checked ? 3 :
+                miHtml.Checked ? 4 :
                 miCSharp.Checked ? 6 :
                 miCPlus.Checked ? 7 :
                 miSql.Checked ? 8 : -1;
@@ -270,7 +272,7 @@ namespace JSEditor
             {
                 SaveFile(sfd.FileName);
                 GetCurrentControl().IsChanged = false;
-                tabControl1.TabPages[tabControl1.SelectedIndex].Text = GetCurrentControl().FileName;
+                tabControl1.TabPages[tabControl1.SelectedIndex].Text = new FileInfo(sfd.FileName).Name;
             }
         }
 
@@ -329,6 +331,55 @@ namespace JSEditor
         }
         #endregion
 
+        private void miSearch_Click(object sender, EventArgs e)
+        {
+            if (findForm == null)
+            {
+                startedTab = tabControl1.SelectedIndex;
+                findForm = new FindForm();
+                findForm.MainForm = this;
+            }
+            findForm.Show();
+        }
+
+        #endregion
+
+        #region Search
+        FindForm findForm;
+        int startedTab;
+        /// <summary>
+        /// Make search aroung the files
+        /// </summary>
+        /// <param name="pattern">Search string</param>
+        /// <param name="target">0 - Current document, 1 - All open documents, 2 - Selection</param>
+        internal int DoSearch(string pattern, int target, int fromPosition)
+        {
+            cRichTextBox item = GetCurrentControl();
+            int pos = -1;
+            if (target == 2)
+            {
+                pos = item.SelectedText.IndexOf(pattern, fromPosition);
+                if (pos > 0) SelectFromPosition(pos, pattern.Length);
+            }
+            if (target < 2)
+            {
+                pos = item.Text.IndexOf(pattern, fromPosition);
+                if (pos > 0) SelectFromPosition(pos, pattern.Length);
+                else if (target == 1 && startedTab != (tabControl1.SelectedIndex + 1) % tabControl1.TabPages.Count)
+                {
+                    tabControl1.SelectedIndex = (tabControl1.SelectedIndex + 1) % tabControl1.TabPages.Count;
+                    pos = DoSearch(pattern, target, 0);
+                }
+            }
+
+            return pos;
+        }
+
+        private void SelectFromPosition(int pos, int p)
+        {
+            GetCurrentControl().SelectText(pos, p);
+            this.Show();
+        }
         #endregion
     }
 }

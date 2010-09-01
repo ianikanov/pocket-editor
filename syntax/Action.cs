@@ -1,5 +1,3 @@
-//using ...
-
 namespace Syntax
 {
 	public class Action : Lexem

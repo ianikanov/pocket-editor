@@ -67,6 +67,13 @@
     <Compile Include="cRichTextBox.Designer.cs">
       <DependentUpon>cRichTextBox.cs</DependentUpon>
     </Compile>
+    <Compile Include="EditorClasses\Editor.cs" />
+    <Compile Include="FindForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FindForm.Designer.cs">
+      <DependentUpon>FindForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -80,6 +87,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="cRichTextBox.resx">
       <DependentUpon>cRichTextBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FindForm.resx">
+      <DependentUpon>FindForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
@@ -103,9 +113,10 @@
     <Compile Include="SettingsForm.Designer.cs">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ClassDiagram1.cd" />
+    <Compile Include="syntax\Action.cs" />
+    <Compile Include="syntax\IRevertsElement.cs" />
+    <Compile Include="syntax\Lexem.cs" />
+    <Compile Include="syntax\RevertSequence.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Document.ico" />
