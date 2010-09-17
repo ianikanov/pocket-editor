@@ -15,7 +15,11 @@ namespace JSEditor
         {
             InitializeComponent();
             textlen = 0;
+            TextProcessor = new CTextProcessor();
+            TextProcessor.ControlInstanse = txtMain;
         }
+
+        public CTextProcessor TextProcessor { get; set; }
 
         public string FileName { get; set; }
         public bool IsChanged { get; set; }
@@ -127,7 +131,7 @@ namespace JSEditor
             int len = txtMain.SelectionLength;
             txtMain.Text = str.Substring(0, str.Length - 1);
             txtMain.SelectionStart = curPosition;
-            txtMain.SelectionLength = len + ret;
+            if (len > 0) txtMain.SelectionLength = len + ret;
             txtMain.ScrollToCaret();
         }
 
@@ -187,7 +191,7 @@ namespace JSEditor
             int len = txtMain.SelectionLength;
             txtMain.Text = str.Substring(0, str.Length - 1);
             txtMain.SelectionStart = curPosition;
-            txtMain.SelectionLength = len - ret;
+            if (len > 0) txtMain.SelectionLength = len - ret;
             txtMain.ScrollToCaret();
         }
 

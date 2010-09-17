@@ -31,9 +31,9 @@
             this.lblLines = new System.Windows.Forms.Label();
             this.txtMain = new System.Windows.Forms.TextBox();
             this.contextMenu1 = new System.Windows.Forms.ContextMenu();
+            this.miCut = new System.Windows.Forms.MenuItem();
             this.miCopy = new System.Windows.Forms.MenuItem();
             this.miPaste = new System.Windows.Forms.MenuItem();
-            this.miCut = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // lblLines
@@ -65,6 +65,11 @@
             this.contextMenu1.MenuItems.Add(this.miCopy);
             this.contextMenu1.MenuItems.Add(this.miPaste);
             // 
+            // miCut
+            // 
+            this.miCut.Text = "Cut";
+            this.miCut.Click += new System.EventHandler(this.miCut_Click);
+            // 
             // miCopy
             // 
             this.miCopy.Text = "Copy";
@@ -74,11 +79,6 @@
             // 
             this.miPaste.Text = "Paste";
             this.miPaste.Click += new System.EventHandler(this.miPaste_Click);
-            // 
-            // miCut
-            // 
-            this.miCut.Text = "Cut";
-            this.miCut.Click += new System.EventHandler(this.miCut_Click);
             // 
             // cRichTextBox
             // 
@@ -95,10 +95,10 @@
         #endregion
 
         private System.Windows.Forms.Label lblLines;
-        private System.Windows.Forms.TextBox txtMain;
         private System.Windows.Forms.ContextMenu contextMenu1;
         private System.Windows.Forms.MenuItem miCopy;
         private System.Windows.Forms.MenuItem miPaste;
         private System.Windows.Forms.MenuItem miCut;
+        internal System.Windows.Forms.TextBox txtMain;
     }
 }

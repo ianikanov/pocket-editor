@@ -61,13 +61,14 @@
     <Compile Include="AboutForm.Designer.cs">
       <DependentUpon>AboutForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="CLanguage.cs" />
     <Compile Include="cRichTextBox.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="cRichTextBox.Designer.cs">
       <DependentUpon>cRichTextBox.cs</DependentUpon>
     </Compile>
-    <Compile Include="EditorClasses\Editor.cs" />
+    <Compile Include="CTextProcessor.cs" />
     <Compile Include="FindForm.cs">
       <SubType>Form</SubType>
     </Compile>
