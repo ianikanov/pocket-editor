@@ -23,26 +23,24 @@ namespace JSEditor
         private void addTab(string name)
         { 
             cRichTextBox txt = new cRichTextBox();
-            if (tabControl1.TabPages.Count > 0) txt.Language = GetCurrentControl().Language;
-            else txt.Language = 1;
-            txt.Dock = DockStyle.Fill;
-            TabPage tab = new TabPage();
-            //tab.Name = name;
-            tab.Text = name;
-            tab.Controls.Add(txt);
-            tabControl1.TabPages.Add(tab);
+            txt.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Php];
+            txt.TabName = name;
+            tabControl1.TabPages.Add(txt.Tab);
             tabControl1.SelectedIndex = tabControl1.TabPages.Count - 1;
         }
 
-        private cRichTextBox GetCurrentControl()
+        private cRichTextBox CurrentControl
         {
-            try
+            get
             {
-                return (tabControl1.TabPages[tabControl1.SelectedIndex].Controls[0] as cRichTextBox);
-            }
-            catch
-            {
-                return null;
+                try
+                {
+                    return (tabControl1.TabPages[tabControl1.SelectedIndex].Controls[0] as cRichTextBox);
+                }
+                catch
+                {
+                    return null;
+                }
             }
         }
 
@@ -66,16 +64,16 @@ namespace JSEditor
         {
             if (tabControl1.TabPages.Count > 0)
             {
-                int lng = GetCurrentControl().Language;
                 foreach (MenuItem mi in menuLanguage.MenuItems) mi.Checked = false;
-                switch (lng)
+                switch (CurrentControl.TextProcessor.Language.Language)
                 {
-                    case 1: miPhp.Checked = true; break;
-                    case 2: miFlash.Checked = true; break;
-                    case 3: miHtml.Checked = true; break;
-                    case 4: miPhp.Checked = true; break;
-                    case 5: miPhp.Checked = true; break;
-                    case 6: miPhp.Checked = true; break;
+                    case DevelopLanguages.Php: miPhp.Checked = true; break;
+                    case DevelopLanguages.ActionScript: miFlash.Checked = true; break;
+                    case DevelopLanguages.Html: miHtml.Checked = true; break;
+                    case DevelopLanguages.Javascript: miHtml.Checked = true; break;
+                    case DevelopLanguages.CSharp: miCSharp.Checked = true; break;
+                    case DevelopLanguages.Cpp: miCPlus.Checked = true; break;
+                    case DevelopLanguages.Sql: miSql.Checked = true; break;
                 }
             }
         }
@@ -87,9 +85,9 @@ namespace JSEditor
             foreach (TabPage pg in tabControl1.TabPages)
             {
                 tabControl1.SelectedIndex = cur++;
-                if (GetCurrentControl().IsChanged)
+                if (CurrentControl.TextProcessor.IsModified)
                 {
-                    DialogResult res = MessageBox.Show("File " + GetCurrentControl().FileName + " was changed. Save?", "Closing", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
+                    DialogResult res = MessageBox.Show("File " + CurrentControl.FileName + " was changed. Save?", "Closing", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
                     if (res == DialogResult.Cancel)
                     {
                         e.Cancel = true;
@@ -108,26 +106,26 @@ namespace JSEditor
         #region buttons
         private void btnComment_Click(object sender, EventArgs e)
         {
-            GetCurrentControl().Comment();
-            GetCurrentControl().FocusText();
+            CurrentControl.Comment();
+            CurrentControl.FocusText();
         }
 
         private void btnUncomment_Click(object sender, EventArgs e)
         {
-            GetCurrentControl().Uncomment();
-            GetCurrentControl().FocusText();
+            CurrentControl.Uncomment();
+            CurrentControl.FocusText();
         }
 
         private void btnSave_Click(object sender, EventArgs e)
         {
             miSave_Click(null, null);
-            GetCurrentControl().FocusText();
+            CurrentControl.FocusText();
         }
 
         private void btnSaveAll_Click(object sender, EventArgs e)
         {
             miSaveAll_Click(null, null);
-            GetCurrentControl().FocusText();
+            CurrentControl.FocusText();
         }
 
         private void btnVerify_Click(object sender, EventArgs e)
@@ -157,27 +155,27 @@ namespace JSEditor
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 FileInfo f = new FileInfo(ofd.FileName);
-                if (!string.IsNullOrEmpty(GetCurrentControl().FileName) || GetCurrentControl().IsChanged) addTab(f.Name);
-                GetCurrentControl().FileName = ofd.FileName;
+                if (!string.IsNullOrEmpty(CurrentControl.FileName) || CurrentControl.TextProcessor.IsModified) addTab(f.Name);
+                CurrentControl.FileName = ofd.FileName;
                 tabControl1.TabPages[tabControl1.SelectedIndex].Text = f.Name;
                 foreach (MenuItem mi in menuLanguage.MenuItems) mi.Checked = false;
                 switch (f.Extension)
                 {
-                    case ".php": miPhp.Checked = true; GetCurrentControl().Language = 1; break;
-                    case ".as": miFlash.Checked = true; GetCurrentControl().Language = 2; break;
-                    case ".html": miHtml.Checked = true; GetCurrentControl().Language = 3; break;
-                    case ".htm": miHtml.Checked = true; GetCurrentControl().Language = 3; break;
-                    case ".js": miHtml.Checked = true; GetCurrentControl().Language = 3; break;
-                    case ".cs": miPhp.Checked = true; GetCurrentControl().Language = 4; break;
-                    case ".cpp": miPhp.Checked = true; GetCurrentControl().Language = 5; break;
-                    case ".sql": miPhp.Checked = true; GetCurrentControl().Language = 6; break;
+                    case ".php": miPhp.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Php]; break;
+                    case ".as": miFlash.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.ActionScript]; break;
+                    case ".html": miHtml.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Html]; break;
+                    case ".htm": miHtml.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Html]; break;
+                    case ".js": miHtml.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Javascript]; break;
+                    case ".cs": miPhp.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.CSharp]; break;
+                    case ".cpp": miPhp.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Cpp]; break;
+                    case ".sql": miPhp.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Sql]; break;
                     default: Settings.Log(string.Format("While trying to open file {0} its extension {1} was not recognised", f.FullName, f.Extension)); break;
                 }
                 StreamReader sr = null;
                 try
                 {
                     sr = f.OpenText();
-                    GetCurrentControl().Text = sr.ReadToEnd().Replace("\t", Settings.TabSwap);
+                    CurrentControl.Text = sr.ReadToEnd().Replace("\t", Settings.TabSwap);
                     sr.Close();
                 }
                 catch (Exception ex)
@@ -190,11 +188,11 @@ namespace JSEditor
 
         private void miSave_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(GetCurrentControl().FileName)) AskAndSave();
+            if (string.IsNullOrEmpty(CurrentControl.FileName)) AskAndSave();
             else
             {
-                SaveFile(GetCurrentControl().FileName);
-                GetCurrentControl().IsChanged = false;
+                SaveFile(CurrentControl.FileName);
+                CurrentControl.TextProcessor.IsModified = false;
             }
         }
 
@@ -221,7 +219,7 @@ namespace JSEditor
 
         private void miClose_Click(object sender, EventArgs e)
         {
-            if (GetCurrentControl().IsChanged)
+            if (CurrentControl.TextProcessor.IsModified)
             {
                 DialogResult res = MessageBox.Show("File was changed. Save?", "Closing", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
                 if (res == DialogResult.Cancel)
@@ -243,12 +241,12 @@ namespace JSEditor
         private void SaveFile(string fname)
         {
             FileInfo f = new FileInfo(fname);
-            GetCurrentControl().FileName = f.FullName;
+            CurrentControl.FileName = f.FullName;
             StreamWriter sw = null;
             try
             {
                 sw = f.CreateText();
-                sw.Write(GetCurrentControl().Text.Replace(Settings.TabSwap, "\t"));
+                sw.Write(CurrentControl.TextProcessor.Text.Replace(Settings.TabSwap, "\t"));
                 sw.Close();
             }
             catch (Exception ex)
@@ -271,14 +269,14 @@ namespace JSEditor
             if (sfd.ShowDialog() == DialogResult.OK)
             {
                 SaveFile(sfd.FileName);
-                GetCurrentControl().IsChanged = false;
+                CurrentControl.TextProcessor.IsModified = false;
                 tabControl1.TabPages[tabControl1.SelectedIndex].Text = new FileInfo(sfd.FileName).Name;
             }
         }
 
         private bool CheckAndSave()
         {
-            if (GetCurrentControl().IsChanged)
+            if (CurrentControl.TextProcessor.IsModified)
             {
                 DialogResult res = MessageBox.Show("You have unsaved changes. Do you want to save it?", "Unsaved", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button3);
                 if (res == DialogResult.Cancel) return false;
@@ -310,7 +308,8 @@ namespace JSEditor
                 mi.Checked = false;
                 if (mi.Equals(sender))
                 {
-                    GetCurrentControl().Language = i;
+#warning set language
+                    //GetCurrentControl().Language = i;
                     mi.Checked = true;
                 }
             }
@@ -320,14 +319,14 @@ namespace JSEditor
         #region tab
         private void miTabRight_Click(object sender, EventArgs e)
         {
-            GetCurrentControl().TabRight();
-            GetCurrentControl().FocusText();
+            CurrentControl.TabRight();
+            CurrentControl.FocusText();
         }
 
         private void miTabLeft_Click(object sender, EventArgs e)
         {
-            GetCurrentControl().TabLeft();
-            GetCurrentControl().FocusText();
+            CurrentControl.TabLeft();
+            CurrentControl.FocusText();
         }
         #endregion
 
@@ -354,16 +353,15 @@ namespace JSEditor
         /// <param name="target">0 - Current document, 1 - All open documents, 2 - Selection</param>
         internal int DoSearch(string pattern, int target, int fromPosition)
         {
-            cRichTextBox item = GetCurrentControl();
             int pos = -1;
             if (target == 2)
             {
-                pos = item.SelectedText.IndexOf(pattern, fromPosition);
+                pos = CurrentControl.TextProcessor.SelectedText.IndexOf(pattern, fromPosition);
                 if (pos > 0) SelectFromPosition(pos, pattern.Length);
             }
             if (target < 2)
             {
-                pos = item.Text.IndexOf(pattern, fromPosition);
+                pos = CurrentControl.TextProcessor.Text.IndexOf(pattern, fromPosition);
                 if (pos > 0) SelectFromPosition(pos, pattern.Length);
                 else if (target == 1 && startedTab != (tabControl1.SelectedIndex + 1) % tabControl1.TabPages.Count)
                 {
@@ -377,7 +375,7 @@ namespace JSEditor
 
         private void SelectFromPosition(int pos, int p)
         {
-            GetCurrentControl().SelectText(pos, p);
+            CurrentControl.TextProcessor.ControlInstanse.Select(pos, p);
             this.Show();
         }
         #endregion
