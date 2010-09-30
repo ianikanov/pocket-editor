@@ -95,17 +95,5 @@ namespace JSEditor
             TextProcessor.RemoveBeginning("//", false);
         }
         #endregion
-
-        #region File
-        public bool? Save()
-        {
-            return null;
-        }
-
-        public bool Load()
-        {
-            return false;
-        }
-        #endregion
     }
 }

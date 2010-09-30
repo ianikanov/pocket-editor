@@ -29,11 +29,20 @@ namespace JSEditor
         {
             get
             {
-                return ControlInstanse.Text.Split((char)Keys.Enter);
+                List<string> ret = new List<string>();
+                int subIndex;
+                string text = ControlInstanse.Text;
+                while ((subIndex = text.IndexOf("\r\n")) > -1)
+                {
+                    ret.Add(text.Substring(0, subIndex));
+                    text = text.Substring(subIndex + 2);
+                }
+                ret.Add(text);
+                return ret.ToArray();
             }
             set
             {
-                ControlInstanse.Text = string.Join(Keys.Enter.ToString(), value);
+                ControlInstanse.Text = string.Join("\r\n", value);
             }
         }
         /// <summary>
@@ -41,12 +50,23 @@ namespace JSEditor
         /// </summary>
         public int SelectedLineIndex
         {
-            get { return ControlInstanse.Text.Substring(0, ControlInstanse.SelectionStart).Split((char)Keys.Enter).Length; }
+            get 
+            {
+                List<string> ret = new List<string>();
+                int subIndex;
+                string text = ControlInstanse.Text.Substring(0, ControlInstanse.SelectionStart);
+                while ((subIndex = text.IndexOf("\r\n")) > -1)
+                {
+                    ret.Add(text.Substring(0, subIndex));
+                    text = text.Substring(subIndex + 2);
+                }
+                ret.Add(text);
+                return ret.Count - 1;
+            }
             set
             {
                 int len = 0;
-#warning May be not exact because of 'Enter' char
-                for (int i = 0; i < value; i++) len += Lines[i].Length;
+                for (int i = 0; i < value; i++) len += Lines[i].Length + 2;
                 ControlInstanse.Select(len, 0);
             }
         }
@@ -54,13 +74,24 @@ namespace JSEditor
         /// Count of selected lines
         /// </summary>
         public int SelectedLinesCount {
-            get { return ControlInstanse.Text.Substring(0, ControlInstanse.SelectionStart + ControlInstanse.SelectionLength).Split((char)Keys.Enter).Length; }
+            get 
+            {
+                List<string> ret = new List<string>();
+                int subIndex;
+                string text = SelectedText;
+                while ((subIndex = text.IndexOf("\r\n")) > -1)
+                {
+                    ret.Add(text.Substring(0, subIndex));
+                    text = text.Substring(subIndex + 2);
+                }
+                ret.Add(text);
+                return ret.Count;
+            }
             set
             {
                 int len = 0;
-#warning May be not exact because of 'Enter' char
-                for (int i = SelectedLineIndex; i < value; i++) len += Lines[i].Length;
-                ControlInstanse.Select(ControlInstanse.SelectionStart, len);
+                for (int i = SelectedLineIndex; i < SelectedLineIndex + value; i++) len += Lines[i].Length + 2;
+                ControlInstanse.Select(ControlInstanse.SelectionStart, len - 2);
             }
         }
         /// <summary>
@@ -89,6 +120,15 @@ namespace JSEditor
         #endregion
 
         #region public methods
+        /// <summary>
+        /// Make current word selected
+        /// </summary>
+        public void SelectWord()
+        {
+            Word wd = GetWord(null);
+            ControlInstanse.Select(wd.startPosition, wd.length);
+        }
+
         #region performing begin of line methods
         /// <summary>
         /// Insert specified pattern at the beginning of all selected lines
@@ -97,20 +137,9 @@ namespace JSEditor
         public void AddBeginning(string newSpace)
         {
             string[] ls = Lines;
-            string str = "";
-            int ret = 0;
-            for (int i = 0; i < LineCount; i++)
+            for (int i = 0; i < SelectedLinesCount; i++)
             {
-#warning Not sure about \r
-                if (i >= SelectedLineIndex && i < SelectedLineIndex + SelectedLinesCount)
-                {
-                    str += ls[i].Insert((i == 0) ? 0 : 1, newSpace) + "\r";
-                    ret += newSpace.Length;
-                }
-                else
-                {
-                    str += ls[i] + "\r";
-                }
+                ls[SelectedLineIndex + i] = ls[SelectedLineIndex + i].Insert(0, newSpace);
             }
             int[] val = new int[] { SelectedLineIndex, SelectedLinesCount };
             Lines = ls;
@@ -127,46 +156,29 @@ namespace JSEditor
         public void RemoveBeginning(string newSpace, bool allowSubStr)
         {
             string[] ls = Lines;
-            string str = "";
             string line;
             int cnt;
             string pattern;
-            int ret = 0;
-            for (int i = 0; i < ls.Length; i++)
+            for (int i = 0; i < SelectedLinesCount; i++)
             {
-                if (i >= SelectedLineIndex && i < SelectedLineIndex + SelectedLinesCount)
+                cnt = newSpace.Length;
+                pattern = newSpace;
+                line = ls[SelectedLineIndex + i];
+                //ищем любые вхождения
+                while (!line.StartsWith(pattern))
                 {
-                    cnt = newSpace.Length;
-                    pattern = newSpace;
-                    if (ls[i].StartsWith("\n"))
+                    if (!allowSubStr)//если для любых запрещено - то выходим
                     {
-                        str += "\n";
-                        line = ls[i].Substring(1);
+                        cnt = 0;
+                        break;
                     }
-                    else line = ls[i];
-                    //ищем любые вхождения
-                    while (!line.StartsWith(pattern))
-                    {
-                        if (!allowSubStr)//если для любых запрещено - то выходим
-                        {
-                            cnt = 0;
-                            break;
-                        }
-                        if (--cnt == 0) break;
-                        pattern = newSpace.Substring(0, cnt);
-                    }
-                    //если нашли, то удаляем
-#warning Not sure about \r
-                    if (cnt > 0)
-                    {
-                        str += line.Substring(cnt) + "\r";
-                        ret += cnt;
-                    }
-                    else str += line + "\r";
+                    if (--cnt == 0) break;
+                    pattern = newSpace.Substring(0, cnt);
                 }
-                else
+                //если нашли, то удаляем
+                if (cnt > 0)
                 {
-                    str += ls[i] + "\r";
+                    ls[SelectedLineIndex + i] = line.Substring(cnt);
                 }
             }
             int[] val = new int[] { SelectedLineIndex, SelectedLinesCount };
@@ -228,13 +240,11 @@ namespace JSEditor
                     {
                         int spacesCount = 0;
                         string newSpace = "";
-                        if (SelectedLineIndex != 1) spacesCount++;
                         while ((Lines[SelectedLineIndex - 1].Length > spacesCount) && (Lines[SelectedLineIndex - 1][spacesCount++] == ' ')) newSpace += " ";
+                        curPosition = ControlInstanse.SelectionStart;
                         AddBeginning(newSpace);
-                        //curPosition = ControlInstanse.SelectionStart;
-                        //Text = Text.Insert(curPosition, newSpace);
-                        //txtMain.SelectionStart = curPosition + newSpace.Length;
-                        //txtMain.ScrollToCaret();
+                        ControlInstanse.Select(curPosition + newSpace.Length, 0);
+                        ControlInstanse.ScrollToCaret();
                     }
                     catch (Exception ex)
                     {
@@ -248,8 +258,8 @@ namespace JSEditor
                     ControlInstanse.SelectionStart = curPosition + 1;
                     ControlInstanse.ScrollToCaret();
                 }
+                textlen = Text.Length;
             }
-            textlen = Text.Length;
         }
         #endregion
         #endregion
