@@ -62,7 +62,7 @@ namespace JSEditor
 
         private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (tabControl1.TabPages.Count > 0)
+            if (tabControl1.TabPages.Count > 0 && CurrentControl.TextProcessor.Language != null)
             {
                 foreach (MenuItem mi in menuLanguage.MenuItems) mi.Checked = false;
                 switch (CurrentControl.TextProcessor.Language.Language)
@@ -154,35 +154,7 @@ namespace JSEditor
             ofd.Filter = "PHP files|*.php|ActionScript files|*.as|HTM files|*.htm|HTML files|*.html|JavaScript files|*.js|C# files|*.cs|C++ files|*.cpp|SQL files|*.sql|All code files|*.php;*.as;*.htm;*.html;*.js;*.cs;*.cpp;*.sql|All files|*.*";
             if (ofd.ShowDialog() == DialogResult.OK)
             {
-                FileInfo f = new FileInfo(ofd.FileName);
-                if (!string.IsNullOrEmpty(CurrentControl.FileName) || CurrentControl.TextProcessor.IsModified) addTab(f.Name);
-                CurrentControl.FileName = ofd.FileName;
-                tabControl1.TabPages[tabControl1.SelectedIndex].Text = f.Name;
-                foreach (MenuItem mi in menuLanguage.MenuItems) mi.Checked = false;
-                switch (f.Extension)
-                {
-                    case ".php": miPhp.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Php]; break;
-                    case ".as": miFlash.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.ActionScript]; break;
-                    case ".html": miHtml.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Html]; break;
-                    case ".htm": miHtml.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Html]; break;
-                    case ".js": miHtml.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Javascript]; break;
-                    case ".cs": miPhp.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.CSharp]; break;
-                    case ".cpp": miPhp.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Cpp]; break;
-                    case ".sql": miPhp.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Sql]; break;
-                    default: Settings.Log(string.Format("While trying to open file {0} its extension {1} was not recognised", f.FullName, f.Extension)); break;
-                }
-                StreamReader sr = null;
-                try
-                {
-                    sr = f.OpenText();
-                    CurrentControl.Text = sr.ReadToEnd().Replace("\t", Settings.TabSwap);
-                    sr.Close();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
-                    if (sr != null) sr.Close();
-                }
+                OpenFile(ofd.FileName);
             }
         }
 
@@ -283,6 +255,39 @@ namespace JSEditor
                 if (res == DialogResult.Yes) AskAndSave();
             }
             return true;
+        }
+
+        public void OpenFile(string fname)
+        {
+            FileInfo f = new FileInfo(fname);
+            if (!string.IsNullOrEmpty(CurrentControl.FileName) || CurrentControl.TextProcessor.IsModified) addTab(f.Name);
+            CurrentControl.FileName = fname;
+            tabControl1.TabPages[tabControl1.SelectedIndex].Text = f.Name;
+            foreach (MenuItem mi in menuLanguage.MenuItems) mi.Checked = false;
+            switch (f.Extension)
+            {
+                case ".php": miPhp.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Php]; break;
+                case ".as": miFlash.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.ActionScript]; break;
+                case ".html": miHtml.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Html]; break;
+                case ".htm": miHtml.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Html]; break;
+                case ".js": miHtml.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Javascript]; break;
+                case ".cs": miPhp.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.CSharp]; break;
+                case ".cpp": miPhp.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Cpp]; break;
+                case ".sql": miPhp.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Sql]; break;
+                default: Settings.Log(string.Format("While trying to open file {0} its extension {1} was not recognised", f.FullName, f.Extension)); break;
+            }
+            StreamReader sr = null;
+            try
+            {
+                sr = f.OpenText();
+                CurrentControl.TextProcessor.Text = sr.ReadToEnd().Replace("\t", Settings.TabSwap);
+                sr.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
+                if (sr != null) sr.Close();
+            }
         }
         #endregion
 

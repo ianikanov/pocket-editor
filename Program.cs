@@ -11,9 +11,11 @@ namespace JSEditor
         /// The main entry point for the application.
         /// </summary>
         [MTAThread]
-        static void Main()
+        static void Main(string[] Args)
         {
-            Application.Run(new Form1());
+            Form1 main = new Form1();
+            if (Args.Length > 0) main.OpenFile(Args[0]);
+            Application.Run(main);
         }
     }
 }
