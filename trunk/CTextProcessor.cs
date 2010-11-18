@@ -258,8 +258,8 @@ namespace JSEditor
                     ControlInstanse.SelectionStart = curPosition + 1;
                     ControlInstanse.ScrollToCaret();
                 }
-                textlen = Text.Length;
             }
+            textlen = Text.Length;
         }
         #endregion
         #endregion

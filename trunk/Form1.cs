@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
+using System.Diagnostics;
 
 namespace JSEditor
 {
@@ -15,8 +16,11 @@ namespace JSEditor
         {
             InitializeComponent();
             Settings.Load();
-            Settings.Log("loaded");
+            tabControl1.TabPages.RemoveAt(0);//remove initial
+            addTab("Untitled");//and add normally
         }
+
+        private CFileManager _FileMng = new CFileManager();
 
         #region Tabs
 
@@ -80,23 +84,14 @@ namespace JSEditor
 
         private void Form1_Closing(object sender, CancelEventArgs e)
         {
-            int prev = tabControl1.SelectedIndex;
-            int cur = 0;
-            foreach (TabPage pg in tabControl1.TabPages)
+            int cnt = tabControl1.TabPages.Count;
+            for (int cur = 0; cur < cnt; cur++)
             {
-                tabControl1.SelectedIndex = cur++;
-                if (CurrentControl.TextProcessor.IsModified)
+                tabControl1.SelectedIndex = cur;
+                if (!CheckAndSave())
                 {
-                    DialogResult res = MessageBox.Show("File " + CurrentControl.FileName + " was changed. Save?", "Closing", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
-                    if (res == DialogResult.Cancel)
-                    {
-                        e.Cancel = true;
-                        break;
-                    }
-                    if (res == DialogResult.Yes)
-                    {
-                        miSave_Click(null, null);
-                    }
+                    e.Cancel = true;
+                    break;
                 }
             }
         }
@@ -144,33 +139,33 @@ namespace JSEditor
         #region File
         private void miOpen_Click(object sender, EventArgs e)
         {
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.FilterIndex = miPhp.Checked ? 0 :
-                miFlash.Checked ? 2 :
-                miHtml.Checked ? 3 :
-                miCSharp.Checked ? 6 :
-                miCPlus.Checked ? 7 :
-                miSql.Checked ? 8 : -1;
-            ofd.Filter = "PHP files|*.php|ActionScript files|*.as|HTM files|*.htm|HTML files|*.html|JavaScript files|*.js|C# files|*.cs|C++ files|*.cpp|SQL files|*.sql|All code files|*.php;*.as;*.htm;*.html;*.js;*.cs;*.cpp;*.sql|All files|*.*";
-            if (ofd.ShowDialog() == DialogResult.OK)
-            {
-                OpenFile(ofd.FileName);
-            }
+            OpenFile();
         }
 
         private void miSave_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(CurrentControl.FileName)) AskAndSave();
+            if (CurrentControl.FileDescriptor == null) AskAndSave();
             else
             {
-                SaveFile(CurrentControl.FileName);
-                CurrentControl.TextProcessor.IsModified = false;
+                try
+                {
+                    _FileMng.SaveFile(CurrentControl.FileDescriptor.Value, CurrentControl.TextProcessor.Text);
+                    CurrentControl.TextProcessor.IsModified = false;
+                }
+                catch (Exception ex)
+                {
+                    string mes = string.Format("Error occured while saving file: {0}", ex);
+                    Debug.WriteLine(mes);
+                    Settings.Log(mes);
+                    MessageBox.Show(mes);
+                }
             }
         }
 
         private void miSaveAs_Click(object sender, EventArgs e)
         {
-            AskAndSave();
+            JSFile? fd = CurrentControl.FileDescriptor;
+            if (AskAndSave() && fd.HasValue) _FileMng.CloseFile(fd.Value);
         }
 
         private void miSaveAll_Click(object sender, EventArgs e)
@@ -191,104 +186,108 @@ namespace JSEditor
 
         private void miClose_Click(object sender, EventArgs e)
         {
-            if (CurrentControl.TextProcessor.IsModified)
+            if (CheckAndSave())
             {
-                DialogResult res = MessageBox.Show("File was changed. Save?", "Closing", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
-                if (res == DialogResult.Cancel)
-                {
-                    return;
-                }
-                if (res == DialogResult.Yes)
-                {
-                    miSave_Click(null, null);
-                }
+                if (CurrentControl.FileDescriptor.HasValue) _FileMng.CloseFile(CurrentControl.FileDescriptor.Value);
+                tabControl1.TabPages.RemoveAt(tabControl1.SelectedIndex);
+                if (tabControl1.TabPages.Count == 0) addTab("Untitled");
             }
-            tabControl1.TabPages.RemoveAt(tabControl1.SelectedIndex);
-            if (tabControl1.TabPages.Count == 0) addTab("Untitled");
         }
-
-        #endregion
 
         #region File functions
-        private void SaveFile(string fname)
+        /// <summary>
+        /// Open Save file dialog get path and store file
+        /// </summary>
+        /// <returns>True if file is stored, false otherwise</returns>
+        private bool AskAndSave()
         {
-            FileInfo f = new FileInfo(fname);
-            CurrentControl.FileName = f.FullName;
-            StreamWriter sw = null;
-            try
+            string path = _FileMng.ShowSaveFileDialog(CurrentControl.TextProcessor.Language.Language);
+            if (path != null)
             {
-                sw = f.CreateText();
-                sw.Write(CurrentControl.TextProcessor.Text.Replace(Settings.TabSwap, "\t"));
-                sw.Close();
+                try
+                {
+                    CurrentControl.FileDescriptor = _FileMng.SaveFile(path, CurrentControl.TextProcessor.Text);
+                    CurrentControl.TextProcessor.IsModified = false;
+                    CurrentControl.TabName = _FileMng.GetName(CurrentControl.FileDescriptor.Value);
+                }
+                catch (Exception ex)
+                { 
+                    string mes = string.Format("Error occured while saving file {0}: {1}", path, ex);
+                    Debug.WriteLine(mes);
+                    Settings.Log(mes);
+                    MessageBox.Show(mes);
+                    return false;
+                }
+                return true;
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
-                if (sw != null) sw.Close();
-            }
+            return false;
         }
 
-        private void AskAndSave()
-        {
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.FilterIndex = miPhp.Checked ? 1 :
-                miFlash.Checked ? 2 :
-                miHtml.Checked ? 4 :
-                miCSharp.Checked ? 6 :
-                miCPlus.Checked ? 7 :
-                miSql.Checked ? 8 : -1;
-            sfd.Filter = "PHP files|*.php|ActionScript files|*.as|HTM files|*.htm|HTML files|*.html|JavaScript files|*.js|C# files|*.cs|C++ files|*.cpp|SQL files|*.sql|All code files|*.php;*.as;*.htm;*.html;*.js;*.cs;*.cpp;*.sql";
-            if (sfd.ShowDialog() == DialogResult.OK)
-            {
-                SaveFile(sfd.FileName);
-                CurrentControl.TextProcessor.IsModified = false;
-                tabControl1.TabPages[tabControl1.SelectedIndex].Text = new FileInfo(sfd.FileName).Name;
-            }
-        }
-
+        /// <summary>
+        /// Check was file changed or not and store it
+        /// </summary>
+        /// <returns>False if cancelled by user, true otherwise</returns>
         private bool CheckAndSave()
         {
             if (CurrentControl.TextProcessor.IsModified)
             {
                 DialogResult res = MessageBox.Show("You have unsaved changes. Do you want to save it?", "Unsaved", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button3);
                 if (res == DialogResult.Cancel) return false;
-                if (res == DialogResult.Yes) AskAndSave();
+                if (res == DialogResult.Yes) miSave_Click(null, null);
             }
             return true;
         }
 
-        public void OpenFile(string fname)
+        /// <summary>
+        /// Call Open dialog, create instance of Text Control, add tab and set text
+        /// </summary>
+        private void OpenFile()
         {
-            FileInfo f = new FileInfo(fname);
-            if (!string.IsNullOrEmpty(CurrentControl.FileName) || CurrentControl.TextProcessor.IsModified) addTab(f.Name);
-            CurrentControl.FileName = fname;
-            tabControl1.TabPages[tabControl1.SelectedIndex].Text = f.Name;
-            foreach (MenuItem mi in menuLanguage.MenuItems) mi.Checked = false;
-            switch (f.Extension)
+            string path = _FileMng.ShowOpenFileDialog(CurrentControl.TextProcessor.Language.Language);
+            if (path != null)
             {
-                case ".php": miPhp.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Php]; break;
-                case ".as": miFlash.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.ActionScript]; break;
-                case ".html": miHtml.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Html]; break;
-                case ".htm": miHtml.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Html]; break;
-                case ".js": miHtml.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Javascript]; break;
-                case ".cs": miPhp.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.CSharp]; break;
-                case ".cpp": miPhp.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Cpp]; break;
-                case ".sql": miPhp.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Sql]; break;
-                default: Settings.Log(string.Format("While trying to open file {0} its extension {1} was not recognised", f.FullName, f.Extension)); break;
+                OpenFile(path);
             }
-            StreamReader sr = null;
+        }
+
+        /// <summary>
+        /// Open specified file
+        /// </summary>
+        /// <param name="path">Phisical path to file</param>
+        internal void OpenFile(string path)
+        {
             try
             {
-                sr = f.OpenText();
-                CurrentControl.TextProcessor.Text = sr.ReadToEnd().Replace("\t", Settings.TabSwap);
-                sr.Close();
+                if (CurrentControl.FileDescriptor != null || CurrentControl.TextProcessor.IsModified) addTab("new");
+                string text;
+                JSFile fd = _FileMng.OpenFile(path, out text);
+                CurrentControl.TextProcessor.Text = text;
+                //language set
+                foreach (MenuItem mi in menuLanguage.MenuItems) mi.Checked = false;
+                switch (_FileMng.GetExtension(fd))
+                {
+                    case ".php": miPhp.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Php]; break;
+                    case ".as": miFlash.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.ActionScript]; break;
+                    case ".html": miHtml.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Html]; break;
+                    case ".htm": miHtml.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Html]; break;
+                    case ".js": miHtml.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Javascript]; break;
+                    case ".cs": miPhp.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.CSharp]; break;
+                    case ".cpp": miPhp.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Cpp]; break;
+                    case ".sql": miPhp.Checked = true; CurrentControl.TextProcessor.Language = LanguagePack.Instance.Languages[DevelopLanguages.Sql]; break;
+                    default: Settings.Log(string.Format("While trying to open file {0} its extension {1} was not recognised", _FileMng.GetFullName(fd), _FileMng.GetExtension(fd))); break;
+                }
+                CurrentControl.TextProcessor.IsModified = false;
+                CurrentControl.TabName = _FileMng.GetName(fd);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
-                if (sr != null) sr.Close();
+                string mes = string.Format("While opening file the error occured: {0}", ex);
+                Debug.WriteLine(mes);
+                Settings.Log(mes);
+                MessageBox.Show(mes);
             }
         }
+        #endregion
         #endregion
 
         #region other
@@ -321,7 +320,7 @@ namespace JSEditor
         }
         #endregion
 
-        #region tab
+        #region tabulate
         private void miTabRight_Click(object sender, EventArgs e)
         {
             CurrentControl.TabRight();

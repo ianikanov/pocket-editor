@@ -13,8 +13,8 @@ namespace JSEditor
         [MTAThread]
         static void Main(string[] Args)
         {
-            Form1 main = new Form1();
-            if (Args.Length > 0) main.OpenFile(Args[0]);
+            LauncherForm main = new LauncherForm();
+            if (Args.Length > 0) main.InitialString = Args[0];
             Application.Run(main);
         }
     }

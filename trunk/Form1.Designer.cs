@@ -297,7 +297,6 @@
             this.Controls.Add(this.tabControl1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.KeyPreview = true;
-            this.MaximizeBox = false;
             this.Menu = this.mainMenu1;
             this.MinimizeBox = false;
             this.Name = "Form1";

@@ -20,6 +20,7 @@ namespace JSEditor
             _tab.Controls.Add(this);
             TextProcessor = new CTextProcessor();
             TextProcessor.ControlInstanse = txtMain;
+            TextProcessor.Language = new CLanguage();
         }
 
         #region properties
@@ -31,9 +32,9 @@ namespace JSEditor
                 return _tab;
             }
         }
-
-        public string FileName { get; set; }
         public string TabName { get { return _tab.Text; } set { _tab.Text = value; } }
+
+        public JSFile? FileDescriptor { get; set; }
         #endregion
 
         #region events
