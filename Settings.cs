@@ -13,6 +13,7 @@ namespace JSEditor
     public static class Settings
     {
         public static string TabSwap { get; set; }
+        public static bool InTestMode { get; set; }
 
         public static void Load()
         {

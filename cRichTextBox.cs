@@ -96,5 +96,10 @@ namespace JSEditor
             TextProcessor.RemoveBeginning("//", false);
         }
         #endregion
+
+        private void txtMain_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (Settings.InTestMode) MessageBox.Show("You have pressed: " + e.KeyChar.ToString());
+        }
     }
 }
