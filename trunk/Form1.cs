@@ -278,6 +278,7 @@ namespace JSEditor
                 }
                 CurrentControl.TextProcessor.IsModified = false;
                 CurrentControl.TabName = _FileMng.GetName(fd);
+                CurrentControl.FileDescriptor = fd;
             }
             catch (Exception ex)
             {

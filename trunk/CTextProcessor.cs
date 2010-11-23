@@ -17,14 +17,21 @@ namespace JSEditor
         /// <summary>
         /// Full text
         /// </summary>
-        public string Text { get { return ControlInstanse.Text; } set { ControlInstanse.Text = value; } }
+        public string Text { 
+            get { return ControlInstanse.Text; } 
+            set { ControlInstanse.Text = value; } 
+        }
         /// <summary>
         /// Selected text
         /// </summary>
         public string SelectedText { get { return ControlInstanse.SelectedText; } set { ControlInstanse.SelectedText = value; } }
+        #endregion
+
+        #region Text properties
         /// <summary>
         /// Text, separated into lines
         /// </summary>
+        [Obsolete("Deprecated")]
         public string[] Lines
         {
             get
@@ -48,6 +55,7 @@ namespace JSEditor
         /// <summary>
         /// First line in selection index
         /// </summary>
+        [Obsolete("Deprecated")]
         public int SelectedLineIndex
         {
             get 
@@ -73,6 +81,7 @@ namespace JSEditor
         /// <summary>
         /// Count of selected lines
         /// </summary>
+        [Obsolete("Deprecated")]
         public int SelectedLinesCount {
             get 
             {
@@ -97,7 +106,7 @@ namespace JSEditor
         /// <summary>
         /// Total lines count
         /// </summary>
-        public int LineCount { get { return Lines.Length; } }
+        public int LineCount { get { return _lines.Length; } }
         #endregion
 
         #region Common properties
@@ -117,6 +126,11 @@ namespace JSEditor
         /// Stored length of Text
         /// </summary>
         int textlen = 0;
+
+        /// <summary>
+        /// Internal lines array
+        /// </summary>
+        string[] _lines;
         #endregion
 
         #region public methods
@@ -284,10 +298,150 @@ namespace JSEditor
         #endregion
     }
 
+    #region Text classes
     public struct Word
     {
         public string text;
         public int startPosition;
         public int length;
     }
+
+    /// <summary>
+    /// Represent one text line for JSEditor
+    /// </summary>
+    public class CJSLine
+    {
+        #region Constructor
+        /// <summary>
+        /// Creates line structure for specified line of text
+        /// </summary>
+        /// <param name="initial">Line's text</param>
+        /// <param name="num">Ordering number in parent text</param>
+        public CJSLine(string initial, int num)
+        {
+            Text = initial;
+            if (initial.IndexOf("\r\n") > -1) throw new ArgumentException("CJSLine(string): line contains return caret symbol");
+            Length = initial.Length;
+            LineNumber = num;
+            Offset = 0;
+            EndOffset = 0;
+        }
+        #endregion
+
+        public string Text { get; set; }
+
+        #region ReadOnly properties
+        /// <summary>
+        /// Gets length of current textline
+        /// </summary>
+        public int Length { get; private set; }
+        /// <summary>
+        /// Gets offset of this line in parent text
+        /// </summary>
+        public int Offset { get; private set; }
+        /// <summary>
+        /// Gets offset from line-end of this line in parent text
+        /// </summary>
+        public int EndOffset { get; private set; }
+        /// <summary>
+        /// Gets ordering number of this line in parent text
+        /// </summary>
+        public int LineNumber { get; private set; }
+        #endregion
+
+        public CJSLine LeftNeibour { get; set; }
+        public CJSLine RightNeibour { get; set; }
+
+        #region Indexer and implicit cast
+        /// <summary>
+        /// Gets specified char
+        /// </summary>
+        /// <param name="ind">char index in zero-based line</param>
+        public char this[int ind]
+        {
+            get { return Text[ind]; }
+        }
+
+        /// <summary>
+        /// Get line as a string
+        /// </summary>
+        public static implicit operator string(CJSLine ln)
+        {
+            return ln.Text;
+        }
+        #endregion
+    }
+
+    /// <summary>
+    /// Represent text (set of lines) for JSEditor
+    /// </summary>
+    public class CJSText
+    {
+        #region Constructor
+        /// <summary>
+        /// Parse Text class from string, represented whole text
+        /// </summary>
+        /// <param name="initialText">Initial text for parsing</param>
+        public CJSText(string initialText)
+        { 
+            int ind;
+            int lines = 0;
+            Lines = new List<CJSLine>();
+            CJSLine prev = null, cur;
+            //for each line
+            while ((ind = initialText.IndexOf("\r\n")) > -1)
+            {
+                //create item
+                cur = new CJSLine(initialText.Substring(0, ind), lines++);
+                //fill left
+                cur.LeftNeibour = prev;
+                // for previous fill right
+                if (prev != null) prev.RightNeibour = cur;
+                //and prepare next step
+                prev = cur;
+                initialText = initialText.Substring(ind + 2);
+            }
+            //rest
+            cur = new CJSLine(initialText, lines++);
+            cur.LeftNeibour = prev;
+            if (prev != null) prev.RightNeibour = cur;
+            LineCount = lines;
+        }
+        #endregion
+
+        #region ReadOnly properties
+        /// <summary>
+        /// Gets lines array
+        /// </summary>
+        public List<CJSLine> Lines { get; private set; }
+        /// <summary>
+        /// Gets count of lines
+        /// </summary>
+        public int LineCount { get; private set; }
+        #endregion
+
+        #region indexer and implicit cast
+        /// <summary>
+        /// Gets or sets special line
+        /// </summary>
+        /// <param name="ind">line zero-based index</param>
+        /// <returns>indexed line</returns>
+        public CJSLine this[int ind]
+        {
+            get { return Lines[ind]; }
+            private set { Lines[ind] = value; }
+        }
+
+        /// <summary>
+        /// Prepare all internal text as one string
+        /// </summary>
+        public static implicit operator string(CJSText txt)
+        {
+            string ret = "";
+            foreach (string s in txt.Lines) ret = string.Join("\r\n", new string[] { ret, s });
+            return ret;
+        }
+        #endregion
+    }
+    #endregion
 }
