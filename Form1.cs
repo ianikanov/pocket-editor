@@ -149,7 +149,7 @@ namespace JSEditor
             {
                 try
                 {
-                    _FileMng.SaveFile(CurrentControl.FileDescriptor.Value, CurrentControl.TextProcessor.Text);
+                    _FileMng.SaveFile(CurrentControl.FileDescriptor.Value, CurrentControl.Text);
                     CurrentControl.TextProcessor.IsModified = false;
                 }
                 catch (Exception ex)
@@ -206,7 +206,7 @@ namespace JSEditor
             {
                 try
                 {
-                    CurrentControl.FileDescriptor = _FileMng.SaveFile(path, CurrentControl.TextProcessor.Text);
+                    CurrentControl.FileDescriptor = _FileMng.SaveFile(path, CurrentControl.Text);
                     CurrentControl.TextProcessor.IsModified = false;
                     CurrentControl.TabName = _FileMng.GetName(CurrentControl.FileDescriptor.Value);
                 }
@@ -261,7 +261,7 @@ namespace JSEditor
                 if (CurrentControl.FileDescriptor != null || CurrentControl.TextProcessor.IsModified) addTab("new");
                 string text;
                 JSFile fd = _FileMng.OpenFile(path, out text);
-                CurrentControl.TextProcessor.Text = text;
+                CurrentControl.Text = text;
                 //language set
                 foreach (MenuItem mi in menuLanguage.MenuItems) mi.Checked = false;
                 switch (_FileMng.GetExtension(fd))
@@ -361,12 +361,12 @@ namespace JSEditor
             int pos = -1;
             if (target == 2)
             {
-                pos = CurrentControl.TextProcessor.SelectedText.IndexOf(pattern, fromPosition);
+                pos = CurrentControl.SelectedText.IndexOf(pattern, fromPosition);
                 if (pos > 0) SelectFromPosition(pos, pattern.Length);
             }
             if (target < 2)
             {
-                pos = CurrentControl.TextProcessor.Text.IndexOf(pattern, fromPosition);
+                pos = CurrentControl.Text.IndexOf(pattern, fromPosition);
                 if (pos > 0) SelectFromPosition(pos, pattern.Length);
                 else if (target == 1 && startedTab != (tabControl1.SelectedIndex + 1) % tabControl1.TabPages.Count)
                 {
@@ -380,7 +380,8 @@ namespace JSEditor
 
         private void SelectFromPosition(int pos, int p)
         {
-            CurrentControl.TextProcessor.ControlInstanse.Select(pos, p);
+#warning Check SelectFromPosition method
+            //CurrentControl.Select(pos, p);
             this.Show();
         }
         #endregion

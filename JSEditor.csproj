@@ -124,12 +124,16 @@
     <Compile Include="SettingsForm.Designer.cs">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="syntax\Action.cs" />
-    <Compile Include="syntax\IRevertsElement.cs" />
-    <Compile Include="syntax\Lexem.cs" />
-    <Compile Include="syntax\RevertSequence.cs" />
+    <Compile Include="TextClasses.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="icons\Document_html.ico" />
+    <Content Include="icons\Document_sql.ico" />
+    <Content Include="icons\Document_cs.ico" />
+    <Content Include="icons\Document_js.ico" />
+    <Content Include="icons\Document_as.ico" />
+    <Content Include="icons\DocumentB.ico" />
+    <Content Include="icons\Document_php.ico" />
     <Content Include="Document.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />

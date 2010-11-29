@@ -19,7 +19,7 @@ namespace JSEditor
             this.Dock = DockStyle.Fill;
             _tab.Controls.Add(this);
             TextProcessor = new CTextProcessor();
-            TextProcessor.ControlInstanse = txtMain;
+            TextProcessor.ControlInstanse = this;
             TextProcessor.Language = new CLanguage();
         }
 
@@ -35,17 +35,44 @@ namespace JSEditor
         public string TabName { get { return _tab.Text; } set { _tab.Text = value; } }
 
         public JSFile? FileDescriptor { get; set; }
+        
+        /// <summary>
+        /// Inner text
+        /// </summary>
+        public override string Text 
+        {
+            get { return txtMain.Text; }
+            set { txtMain.Text = value; }
+        }
+        /// <summary>
+        /// Selected text
+        /// </summary>
+        public string SelectedText { get { return txtMain.SelectedText; } set { txtMain.SelectedText = value; } }
+        /// <summary>
+        /// Selected index
+        /// </summary>
+        public int SelectedIndex { get { return txtMain.SelectionStart; } set { txtMain.SelectionStart = value; } }
+        /// <summary>
+        /// Selected length
+        /// </summary>
+        public int SelectedLength { get { return txtMain.SelectionLength; } set { txtMain.SelectionLength = value; } }
         #endregion
 
         #region events
-        private void txtMain_TextChanged(object sender, EventArgs e)
+
+        private void txtMain_KeyPress(object sender, KeyPressEventArgs e)
         {
-            TextProcessor.TextChanged();
+            e.Handled = TextProcessor.KeyPressed(e.KeyChar);
         }
 
         public void FocusText()
         {
             txtMain.Focus();
+        }
+
+        public void NavigateToSelection()
+        {
+            txtMain.ScrollToCaret();
         }
         #endregion
 
@@ -57,7 +84,7 @@ namespace JSEditor
 
         private void miCopy_Click(object sender, EventArgs e)
         {
-            Clipboard.SetDataObject(TextProcessor.Copy());
+            Clipboard.SetDataObject(SelectedText);
         }
 
         private void miPaste_Click(object sender, EventArgs e)
@@ -97,9 +124,5 @@ namespace JSEditor
         }
         #endregion
 
-        private void txtMain_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (Settings.InTestMode) MessageBox.Show("You have pressed: " + e.KeyChar.ToString());
-        }
     }
 }
