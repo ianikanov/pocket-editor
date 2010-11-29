@@ -57,7 +57,6 @@
             this.txtMain.Size = new System.Drawing.Size(139, 139);
             this.txtMain.TabIndex = 1;
             this.txtMain.WordWrap = false;
-            this.txtMain.TextChanged += new System.EventHandler(this.txtMain_TextChanged);
             this.txtMain.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtMain_KeyPress);
             // 
             // contextMenu1
